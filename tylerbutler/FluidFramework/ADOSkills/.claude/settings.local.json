@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(fd:*)",
+      "Bash(az extension:*)",
+      "Bash(az devops configure:*)"
+    ]
+  }
+}
