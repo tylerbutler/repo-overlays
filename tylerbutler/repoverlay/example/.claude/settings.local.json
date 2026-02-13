@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(ralph-loop:help)",
+      "Skill(superpowers:executing-plans)",
+      "Bash(/bin/df -h /Volumes/Code/)",
+      "Bash(./target/release/repoverlay:*)",
+      "Bash(fd:*)",
+      "Bash(for pr in 1 2 3 4 5 7 9 12 13 14 15)",
+      "Bash(do echo \"=== PR #$pr ===\")",
+      "Bash(done)",
+      "Skill(superpowers:test-driven-development)",
+      "WebFetch(domain:docs.rs)",
+      "WebFetch(domain:crates.io)",
+      "Skill(claude-code-setup:claude-automation-recommender)",
+      "Bash(wc:*)",
+      "Bash(rg:*)",
+      "WebFetch(domain:hk.jdx.dev)",
+      "Bash(hk --version:*)",
+      "Bash(hk generate:*)",
+      "Bash(hk --help:*)",
+      "Bash(hk install:*)",
+      "Bash(hk validate:*)",
+      "Bash(hk check:*)",
+      "Bash(hk run:*)",
+      "Bash(tee:*)",
+      "Bash(bc:*)",
+      "Bash(find:*)",
+      "Bash(RUST_TEST_THREADS=1 cargo test:*)",
+      "Bash(GIT_EXTERNAL_DIFF= git diff:*)",
+      "Bash(./target/debug/repoverlay add:*)",
+      "Skill(commit-commands:commit)",
+      "Bash(rustc:*)",
+      "Bash(chmod:*)",
+      "Bash(python3:*)",
+      "Bash(xargs:*)",
+      "Bash(echo:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:docs.codecov.com)"
+    ]
+  }
+}
