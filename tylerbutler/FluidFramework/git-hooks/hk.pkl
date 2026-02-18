@@ -1,0 +1,32 @@
+amends "package://github.com/jdx/hk/releases/download/v1.36.0/hk@1.36.0#/Config.pkl"
+import "package://github.com/jdx/hk/releases/download/v1.36.0/hk@1.36.0#/Builtins.pkl"
+
+local linters = new Mapping<String, Step> {
+    ["biome"] = (Builtins.biome) {
+        glob = List(
+            "*.json",
+            "azure/packages/**",
+            "common/build/**",
+            "examples/**",
+            "experimental/**",
+            "packages/**",
+            "tools/markdown-magic/**",
+            "build-tools/**"
+        )
+    }
+}
+
+hooks {
+    ["pre-commit"] {
+        fix = true
+        stash = "git"
+        steps = linters
+    }
+    ["fix"] {
+        fix = true
+        steps = linters
+    }
+    ["check"] {
+        steps = linters
+    }
+}
