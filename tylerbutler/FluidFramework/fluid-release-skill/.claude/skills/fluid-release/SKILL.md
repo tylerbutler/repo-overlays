@@ -5,11 +5,31 @@ description: Guide the Fluid Framework client release group through minor releas
 
 # Fluid Framework Client Release
 
-Interactive release workflow for the client release group. Runs commands autonomously but pauses before creating PRs, pushing branches, or triggering builds.
+Release workflow for the client release group. Supports two modes: **interactive** (default) and **autonomous**.
+
+## Mode Selection
+
+At the start of every release session, ask the user:
+
+> Would you like to run in **interactive** or **autonomous** mode?
+
+### Interactive Mode (default)
+
+Run commands autonomously but pause before creating PRs, pushing branches, or triggering builds. Ask for version confirmation at key points. This is the current behavior.
+
+### Autonomous Mode
+
+Run the entire selected phase end-to-end without pausing. Requirements:
+
+- **Version info upfront:** The user must provide all version numbers before starting (current release version and/or next version, depending on phase). Do not prompt for versions mid-flow.
+- **No confirmation pauses:** Create PRs, push branches, and run `flub release` without asking. Include clear commit messages and PR descriptions.
+- **Phase-scoped execution:** Each phase runs to completion, then reports what the user needs to do next (e.g., "queue the ADO build" or "wait for npm feeds, then re-invoke for type test updates").
+
+If the user provides version info in their initial message (e.g., "release 2.90.0 autonomously"), skip the version questions entirely.
 
 ## Workflow Selection
 
-Ask the user which phase they need:
+Ask the user which phase they need (or detect from context in autonomous mode):
 
 | Phase | When to use | Reference |
 |-------|-------------|-----------|
@@ -35,10 +55,29 @@ Run `pnpm flub release prepare client` to check readiness. Also check for releas
 - [GitHub release-blocking issues](https://github.com/microsoft/FluidFramework/labels/release-blocking)
 - ADO release-blocking issues (check manually)
 
-## Semi-Autonomous Behavior
+## Behavior by Mode
 
-**Run automatically:** `policy-check:asserts`, `layerGeneration:gen`, `flub generate releaseNotes`, `flub generate changelog`, `flub bump`, `build:genver`, `flub typetests`, `flub release prepare`
+### Commands (both modes)
 
-**Pause and confirm before:** creating PRs, pushing branches, running `flub release`, announcing releases
+Run these autonomously in both modes: `policy-check:asserts`, `layerGeneration:gen`, `flub generate releaseNotes`, `flub generate changelog`, `flub bump`, `build:genver`, `flub typetests`, `flub release prepare`
+
+### Checkpoints
+
+| Action | Interactive | Autonomous |
+|--------|------------|------------|
+| Creating PRs | Pause and confirm | Create automatically with descriptive titles/bodies |
+| Pushing branches | Pause and confirm | Push automatically |
+| Running `flub release` | Pause and confirm | Run automatically |
+| Version determination | Ask user to confirm | Use version provided upfront |
+| Announcing releases | Remind user | Remind user (never auto-announce) |
+| ADO build queuing | Instruct user | Instruct user (cannot be automated) |
+
+### Autonomous Mode: Phase Completion Reports
+
+At the end of each autonomous phase, provide a summary:
+
+1. **What was done** — list all PRs created, branches pushed, commands run
+2. **What to do next** — specific manual steps needed (e.g., queue ADO build, merge PRs in order)
+3. **When to continue** — timing guidance for the next phase (e.g., "after PRs merge" or "tomorrow, after npm feeds update")
 
 Read the appropriate reference file for the phase the user selects, then guide them through it step by step.

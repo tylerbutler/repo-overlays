@@ -2,6 +2,12 @@
 
 Update type test baselines on both `main` and the release branch. Do this **the day after** the release to allow ADO npm feeds to pick up the published packages.
 
+## Autonomous Mode Notes
+
+In autonomous mode, run both steps sequentially and create both PRs automatically. Report both PRs at the end.
+
+The user should provide the release branch name (e.g., `release/client/2.90`) upfront in autonomous mode, or it can be inferred from context if the user mentions the version.
+
 ## Step 8: Update Type Test Baselines on Main
 
 ```bash
@@ -22,11 +28,14 @@ Then either do a full build or generate type tests only:
 # Option A: Full build
 pnpm run build
 
-# Option B: Type tests only (faster)
+# Option B: Type tests only (faster, preferred in autonomous mode)
 pnpm run typetests:gen
 ```
 
 Commit and create a PR targeting `main`.
+
+- **Interactive:** Pause and confirm before creating the PR.
+- **Autonomous:** Create the PR automatically.
 
 ## Step 9: Update Type Test Baselines on Release Branch
 
@@ -45,4 +54,14 @@ pnpm run typetests:gen
 
 Commit and create a PR targeting the release branch.
 
+- **Interactive:** Pause and confirm before creating the PR.
+- **Autonomous:** Create the PR automatically.
+
 For the first release of a new minor (X.X0.0), this PR can be combined with the patch version bump PR from Step 7 to avoid running the release branch patch process twice.
+
+**Autonomous mode phase completion:**
+
+> **Phase complete.**
+> - Type test baseline PR (main): [link]
+> - Type test baseline PR (release branch): [link]
+> - **Release process is done.** Merge both PRs when CI passes.

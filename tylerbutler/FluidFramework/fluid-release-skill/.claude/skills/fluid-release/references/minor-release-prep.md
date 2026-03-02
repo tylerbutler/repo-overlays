@@ -2,6 +2,14 @@
 
 Prepare the `main` branch and create the release branch for a new minor release.
 
+## Autonomous Mode Notes
+
+In autonomous mode, the user provides two versions upfront:
+- **Release version**: the current version being released (read from root `package.json`)
+- **Next version**: the version to bump `main` to after the release
+
+Run all steps sequentially. Create PRs automatically. At the end, report all PRs created and remind the user to merge them in order (version bump PR last).
+
 ## Overview
 
 Open four PRs (can be opened in parallel, but merge order matters):
@@ -25,7 +33,7 @@ Timing note: do this close to release to minimize untagged asserts being merged 
 ## Step 2: Update Compatibility Generation
 
 ```bash
-pnpm run -r layerGeneration:gen
+pnpm -r run layerGeneration:gen
 ```
 
 This often produces no changes. If there are changes, commit and create a PR. Must merge before the version bump PR.
@@ -36,7 +44,10 @@ This generates changes only if 33+ days have passed since the last update for a 
 
 ### Determine the version being released
 
-Check the current version in the root `package.json`. This is the version being released (the bump hasn't happened yet at this point). Ask the user to confirm the version.
+Check the current version in the root `package.json`. This is the version being released (the bump hasn't happened yet at this point).
+
+- **Interactive:** Ask the user to confirm the version.
+- **Autonomous:** Use the version provided upfront. If none was provided, read it from `package.json` and proceed.
 
 ### Generate release notes
 
@@ -65,7 +76,10 @@ If feedback requires changeset wording changes:
 
 ### Determine the next version
 
-Ask the user what the next version should be. Client minor versions use the `2.X0.0` pattern:
+- **Interactive:** Ask the user what the next version should be.
+- **Autonomous:** Use the next version provided upfront.
+
+Client minor versions use the `2.X0.0` pattern:
 - After 2.80.0, the next minor is 2.90.0
 - After 2.90.0, the next minor is 2.100.0
 
@@ -89,6 +103,15 @@ Commit and create a PR. **This PR must merge LAST.**
 - Verify all four PRs are merged
 - Check again for release-blocking bugs on [GitHub](https://github.com/microsoft/FluidFramework/labels/release-blocking) and ADO
 
+**Autonomous mode:** In autonomous mode, the PRs have just been created but not yet merged. Stop here and report:
+
+> **Phase complete.** Created the following PRs (merge in this order, version bump last):
+> 1. [list PRs]
+>
+> After all PRs are merged, re-invoke to create the release branch and continue with release execution.
+
+If the user has indicated that PRs are already merged (e.g., re-invoked after merging), proceed with branch creation.
+
 ### Find the correct commit
 
 The release branch is created from the commit **immediately before** the version bump commit. Use:
@@ -108,6 +131,7 @@ git checkout -b release/client/<MAJOR>.<MINOR> <COMMIT_BEFORE_BUMP>
 git push --set-upstream origin release/client/<MAJOR>.<MINOR>
 ```
 
-**Pause and confirm** before pushing. The user may not have permissions to create release branches.
+- **Interactive:** Pause and confirm before pushing. The user may not have permissions to create release branches.
+- **Autonomous:** Push automatically.
 
 After branch creation, proceed to [release execution](release-execution.md).
