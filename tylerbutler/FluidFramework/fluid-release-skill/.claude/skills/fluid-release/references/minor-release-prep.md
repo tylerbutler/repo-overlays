@@ -10,6 +10,9 @@ In autonomous mode, the user provides two versions upfront:
 
 Run all steps sequentially. Create PRs automatically. At the end, report all PRs created and remind the user to merge them in order (version bump PR last).
 
+**Branch naming:** Use `release-prep/` prefix for working branches (NOT `release/`, which is protected on upstream).
+**Push target:** Push working branches to `upstream` if configured, otherwise `origin`.
+
 ## Overview
 
 Open four PRs (can be opened in parallel, but merge order matters):
@@ -26,7 +29,9 @@ Then create the release branch from the commit before the version bump.
 pnpm run policy-check:asserts
 ```
 
-If there are changes, commit them and create a PR. This PR must merge before the version bump PR.
+If there are changes, create a working branch (e.g. `release-prep/tag-asserts-<VERSION>`), commit, push, and create a PR. This PR must merge before the version bump PR.
+
+**Important:** Do NOT use the `release/` branch prefix for working branches — it is protected on upstream. Use `release-prep/` or similar.
 
 Timing note: do this close to release to minimize untagged asserts being merged afterward.
 
@@ -36,7 +41,7 @@ Timing note: do this close to release to minimize untagged asserts being merged 
 pnpm -r run layerGeneration:gen
 ```
 
-This often produces no changes. If there are changes, commit and create a PR. Must merge before the version bump PR.
+This often produces no changes. If there are changes, create a working branch (e.g. `release-prep/compat-gen-<VERSION>`), commit, push, and create a PR. Must merge before the version bump PR.
 
 This generates changes only if 33+ days have passed since the last update for a given package (tracked in `fluidCompatMetadata` in package.json).
 
@@ -63,7 +68,7 @@ pnpm flub generate releaseNotes -g client -t minor --outFile RELEASE_NOTES/<VERS
 pnpm flub generate changelog -g client
 ```
 
-Commit and create a PR. Must merge before the version bump PR.
+Create a working branch (e.g. `release-prep/notes-<VERSION>`), commit both the release notes and changelog changes, push, and create a PR. Must merge before the version bump PR.
 
 ### If changeset edits are needed after generation
 
@@ -79,9 +84,7 @@ If feedback requires changeset wording changes:
 - **Interactive:** Ask the user what the next version should be.
 - **Autonomous:** Use the next version provided upfront.
 
-Client minor versions use the `2.X0.0` pattern:
-- After 2.80.0, the next minor is 2.90.0
-- After 2.90.0, the next minor is 2.100.0
+Default suggestion: increment the minor version by 1 (e.g., 2.90.0 -> 2.91.0). Trust the user-provided version if different; only flag it if it's more than 7-8 minor versions away from the current version.
 
 ### Bump versions
 
@@ -95,7 +98,7 @@ pnpm flub bump client --exact <NEXT_VERSION> --no-commit
 pnpm -r run build:genver
 ```
 
-Commit and create a PR. **This PR must merge LAST.**
+Create a working branch (e.g. `release-prep/bump-<NEXT_VERSION>`), commit, push, and create a PR. **This PR must merge LAST.**
 
 ## Step 5: Create the Release Branch
 
@@ -135,10 +138,18 @@ Branch name format: `release/client/<major>.<minor>` (e.g., `release/client/2.90
 
 ```bash
 git checkout -b release/client/<MAJOR>.<MINOR> <COMMIT_BEFORE_BUMP>
+```
+
+Push to `upstream` if available (check `git remote -v`), otherwise `origin`:
+
+```bash
+# Preferred (if upstream remote exists):
+git push upstream release/client/<MAJOR>.<MINOR>
+# Fallback:
 git push --set-upstream origin release/client/<MAJOR>.<MINOR>
 ```
 
 - **Interactive:** Pause and confirm before pushing. The user may not have permissions to create release branches.
-- **Autonomous:** Push automatically.
+- **Autonomous:** Push automatically, preferring upstream.
 
 After branch creation, proceed to [release execution](release-execution.md).

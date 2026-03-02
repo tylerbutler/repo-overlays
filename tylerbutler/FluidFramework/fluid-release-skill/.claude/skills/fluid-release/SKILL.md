@@ -43,11 +43,12 @@ For **patch releases**, skip directly to release execution on an existing releas
 
 - The repo uses `pnpm` as the package manager
 - `flub` is the Fluid build CLI (`pnpm flub ...` or `pnpm exec flub ...`)
-- Client minor versions follow the `2.X0.0` pattern (e.g., 2.80.0, 2.90.0, 2.100.0)
-- Patches increment within the decade (2.80.0 -> 2.81.0 -> 2.82.0)
+- **Version scheme**: The version numbering is not a simple incrementing pattern (it is NOT always multiples of 10). When suggesting a next version, default to incrementing the minor version by 1 (e.g., 2.90.0 -> 2.91.0). Trust the version the user provides unless it is more than 7-8 minor versions away from the current version (which likely indicates an error).
 - Release branch naming: `release/client/<major>.<minor>` (e.g., `release/client/2.90`)
 - The release branch is created from the commit **before** the version bump on `main`
 - There is no `lerna.json` in this repo
+- **Git remote preference**: When pushing branches, prefer pushing to `upstream` if one is configured for the repo. Check with `git remote -v` if unsure. Only fall back to `origin` if no `upstream` remote exists.
+- **Working branch naming**: Do NOT use the `release/` prefix for working branches (PRs for assert tags, changelogs, version bumps, etc.) because `release/` is a protected prefix on upstream. Use a descriptive prefix instead, e.g. `release-prep/tag-asserts-2.90`, `release-prep/bump-2.91`.
 
 ## Before Starting
 
