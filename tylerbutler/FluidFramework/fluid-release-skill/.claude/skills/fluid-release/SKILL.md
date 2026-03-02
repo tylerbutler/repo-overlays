@@ -48,7 +48,34 @@ For **patch releases**, skip directly to release execution on an existing releas
 - The release branch is created from the commit **before** the version bump on `main`
 - There is no `lerna.json` in this repo
 - **Git remote preference**: When pushing branches, prefer pushing to `upstream` if one is configured for the repo. Check with `git remote -v` if unsure. Only fall back to `origin` if no `upstream` remote exists.
-- **Working branch naming**: Do NOT use the `release/` prefix for working branches (PRs for assert tags, changelogs, version bumps, etc.) because `release/` is a protected prefix on upstream. Use a descriptive prefix instead, e.g. `release-prep/tag-asserts-2.90`, `release-prep/bump-2.91`.
+- **Working branch naming**: Do NOT use the `release/` prefix for working branches because `release/` is protected on upstream. Use the standard naming convention below — these branches double as progress markers.
+
+### Working Branch Convention
+
+Working branches follow a numbered naming scheme under `release-prep/<VERSION>/`:
+
+| Step | Branch name |
+|------|-------------|
+| 1 | `release-prep/<VERSION>/1-tag-asserts` |
+| 2 | `release-prep/<VERSION>/2-compat-gen` |
+| 3 | `release-prep/<VERSION>/3-release-notes` |
+| 4 | `release-prep/<VERSION>/4-bump-<NEXT_VERSION>` |
+
+Example for releasing 2.90.0 with next version 2.91.0:
+`release-prep/2.90.0/1-tag-asserts`, `release-prep/2.90.0/4-bump-2.91.0`
+
+### Detecting Prior Progress
+
+Before starting any phase, check for existing progress by looking at branches and PRs:
+
+```bash
+# Check for existing release-prep branches on upstream
+git ls-remote --heads upstream 'release-prep/<VERSION>/*'
+# Check for open release-prep PRs
+gh pr list --repo microsoft/FluidFramework --search "release-prep/<VERSION>" --state all
+```
+
+If branches or PRs already exist, skip completed steps and resume from where the process left off.
 
 ## Before Starting
 

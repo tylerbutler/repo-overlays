@@ -10,8 +10,17 @@ In autonomous mode, the user provides two versions upfront:
 
 Run all steps sequentially. Create PRs automatically. At the end, report all PRs created and remind the user to merge them in order (version bump PR last).
 
-**Branch naming:** Use `release-prep/` prefix for working branches (NOT `release/`, which is protected on upstream).
+**Branch naming:** Use the standard `release-prep/<VERSION>/<step>` convention (see SKILL.md). NOT `release/`, which is protected on upstream.
 **Push target:** Push working branches to `upstream` if configured, otherwise `origin`.
+
+Before starting, check for existing progress:
+
+```bash
+git ls-remote --heads upstream 'release-prep/<VERSION>/*'
+gh pr list --repo microsoft/FluidFramework --search "release-prep/<VERSION>" --state all
+```
+
+Skip any steps that already have merged PRs or open branches.
 
 ## Overview
 
@@ -29,9 +38,7 @@ Then create the release branch from the commit before the version bump.
 pnpm run policy-check:asserts
 ```
 
-If there are changes, create a working branch (e.g. `release-prep/tag-asserts-<VERSION>`), commit, push, and create a PR. This PR must merge before the version bump PR.
-
-**Important:** Do NOT use the `release/` branch prefix for working branches — it is protected on upstream. Use `release-prep/` or similar.
+If there are changes, create branch `release-prep/<VERSION>/1-tag-asserts`, commit, push to upstream, and create a PR. This PR must merge before the version bump PR.
 
 Timing note: do this close to release to minimize untagged asserts being merged afterward.
 
@@ -41,7 +48,7 @@ Timing note: do this close to release to minimize untagged asserts being merged 
 pnpm -r run layerGeneration:gen
 ```
 
-This often produces no changes. If there are changes, create a working branch (e.g. `release-prep/compat-gen-<VERSION>`), commit, push, and create a PR. Must merge before the version bump PR.
+This often produces no changes. If there are changes, create branch `release-prep/<VERSION>/2-compat-gen`, commit, push to upstream, and create a PR. Must merge before the version bump PR.
 
 This generates changes only if 33+ days have passed since the last update for a given package (tracked in `fluidCompatMetadata` in package.json).
 
@@ -68,7 +75,7 @@ pnpm flub generate releaseNotes -g client -t minor --outFile RELEASE_NOTES/<VERS
 pnpm flub generate changelog -g client
 ```
 
-Create a working branch (e.g. `release-prep/notes-<VERSION>`), commit both the release notes and changelog changes, push, and create a PR. Must merge before the version bump PR.
+Create branch `release-prep/<VERSION>/3-release-notes`, commit both the release notes and changelog changes, push to upstream, and create a PR. Must merge before the version bump PR.
 
 ### If changeset edits are needed after generation
 
@@ -98,7 +105,7 @@ pnpm flub bump client --exact <NEXT_VERSION> --no-commit
 pnpm -r run build:genver
 ```
 
-Create a working branch (e.g. `release-prep/bump-<NEXT_VERSION>`), commit, push, and create a PR. **This PR must merge LAST.**
+Create branch `release-prep/<VERSION>/4-bump-<NEXT_VERSION>`, commit, push to upstream, and create a PR. **This PR must merge LAST.**
 
 ## Step 5: Create the Release Branch
 
