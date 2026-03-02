@@ -67,6 +67,10 @@ If either command returns results, **stop and report the blockers to the user**.
 
 Run these autonomously in both modes: `policy-check:asserts`, `layerGeneration:gen`, `flub generate releaseNotes`, `flub generate changelog`, `flub bump`, `build:genver`, `flub typetests`, `flub release prepare`
 
+### PR Conventions
+
+Use the `build:` conventional commit prefix for all release PR titles (e.g., `build: tag untagged asserts for 2.90.0 release`).
+
 ### Checkpoints
 
 | Action | Interactive | Autonomous |
