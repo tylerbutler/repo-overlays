@@ -16,6 +16,15 @@ git pull
 pnpm install
 ```
 
+### Check for release blockers
+
+```bash
+gh issue list --repo microsoft/FluidFramework --label release-blocking --state open
+gh pr list --repo microsoft/FluidFramework --label release-blocking --state open
+```
+
+If blockers are found, **stop and report them**. Do not proceed with the release. Also remind the user to check ADO for release-blocking issues.
+
 ### Run the release
 
 ```bash
@@ -23,7 +32,7 @@ pnpm flub release -g client -t patch
 ```
 
 - **Interactive:** Pause and confirm before running this command.
-- **Autonomous:** Run automatically.
+- **Autonomous:** Run automatically (only after blocker check passes).
 
 The command will:
 - Run checks and prompt for confirmation

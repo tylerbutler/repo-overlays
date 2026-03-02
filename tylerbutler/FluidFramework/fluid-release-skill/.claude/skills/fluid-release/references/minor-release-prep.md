@@ -101,7 +101,14 @@ Commit and create a PR. **This PR must merge LAST.**
 
 ### Pre-checks
 - Verify all four PRs are merged
-- Check again for release-blocking bugs on [GitHub](https://github.com/microsoft/FluidFramework/labels/release-blocking) and ADO
+- Check again for release-blocking issues:
+
+```bash
+gh issue list --repo microsoft/FluidFramework --label release-blocking --state open
+gh pr list --repo microsoft/FluidFramework --label release-blocking --state open
+```
+
+If blockers are found, **stop and report them**. Do not create the release branch. Also remind the user to check ADO for release-blocking issues.
 
 **Autonomous mode:** In autonomous mode, the PRs have just been created but not yet merged. Stop here and report:
 

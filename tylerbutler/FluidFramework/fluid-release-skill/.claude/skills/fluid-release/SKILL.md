@@ -51,9 +51,14 @@ For **patch releases**, skip directly to release execution on an existing releas
 
 ## Before Starting
 
-Run `pnpm flub release prepare client` to check readiness. Also check for release blockers:
-- [GitHub release-blocking issues](https://github.com/microsoft/FluidFramework/labels/release-blocking)
-- ADO release-blocking issues (check manually)
+Run `pnpm flub release prepare client` to check readiness. Then check for release blockers:
+
+```bash
+gh issue list --repo microsoft/FluidFramework --label release-blocking --state open
+gh pr list --repo microsoft/FluidFramework --label release-blocking --state open
+```
+
+If either command returns results, **stop and report the blockers to the user**. In autonomous mode, do not proceed past this check if blockers exist. Also remind the user to check ADO for release-blocking issues (cannot be queried via CLI).
 
 ## Behavior by Mode
 
