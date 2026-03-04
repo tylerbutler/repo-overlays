@@ -96,18 +96,25 @@ Default suggestion: increment the minor version by 1 (e.g., 2.90.0 -> 2.91.0). T
 ### Bump versions
 
 ```bash
+# Local (interactive):
 pnpm flub bump client --exact <NEXT_VERSION> --no-commit
+
+# CI-safe alternative (non-interactive):
+pnpm -r --include-workspace-root exec npm pkg set version=<NEXT_VERSION>
 ```
 
 ### Generate version files
 
 ```bash
 pnpm -r run build:genver
+pnpm install --no-frozen-lockfile
 ```
 
 Create branch `release-prep/<VERSION>/4-bump-<NEXT_VERSION>`, commit, push to upstream, and create a PR. **This PR must merge LAST.**
 
 ## Step 5: Create the Release Branch
+
+**CI note:** This step requires elevated permissions to create `release/` branches. In CI, skip this step and report it as a required human action.
 
 ### Pre-checks
 - Verify all four PRs are merged

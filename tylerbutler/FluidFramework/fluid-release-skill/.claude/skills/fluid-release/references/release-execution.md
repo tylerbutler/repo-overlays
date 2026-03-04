@@ -6,7 +6,17 @@ Run the release build and bump the release branch to the next patch version. Thi
 
 In autonomous mode, run all commands without pausing. The user must still manually queue the ADO build — report this clearly at the end. Create the patch bump PR automatically.
 
+## CI Note
+
+In CI, this phase is split into two parts separated by a human action:
+- **Step 6 (human):** A human queues the ADO release build and creates the release branch if needed.
+- **Step 7 (automatable):** CI creates the patch bump PR after the release tag exists.
+
+CI should auto-detect which step is needed (see SKILL.md auto-detection logic).
+
 ## Step 6: Run the Release Build
+
+**CI note:** This step requires a human to queue the ADO build. In CI, check for the release tag. If it doesn't exist, report that the human needs to queue the ADO build and stop.
 
 ### Switch to the release branch
 
@@ -33,6 +43,7 @@ pnpm flub release -g client -t patch
 
 - **Interactive:** Pause and confirm before running this command.
 - **Autonomous:** Run automatically (only after blocker check passes).
+- **CI:** Do not run this command. Report that the human must queue the ADO build.
 
 The command will:
 - Run checks and prompt for confirmation
@@ -56,7 +67,7 @@ Once confirmed, remind the user to announce the release in the Fluid Framework "
 
 Wait for the release tag to be added to the repo, then either:
 
-### Option A: Use flub release again
+### Option A: Use flub release again (local only)
 
 ```bash
 pnpm flub release -g client -t patch
@@ -64,10 +75,17 @@ pnpm flub release -g client -t patch
 
 This should detect the release and bump the version automatically.
 
-### Option B: Manual bump
+### Option B: Manual bump (local or CI)
 
 ```bash
+# Local (interactive):
 pnpm exec flub bump client --bumpType patch
+
+# CI-safe alternative (non-interactive):
+# Determine the next patch version (e.g., 2.90.0 -> 2.90.1)
+pnpm -r --include-workspace-root exec npm pkg set version=<NEXT_PATCH_VERSION>
+pnpm -r run build:genver
+pnpm install --no-frozen-lockfile
 ```
 
 Create a PR targeting the release branch with these changes.

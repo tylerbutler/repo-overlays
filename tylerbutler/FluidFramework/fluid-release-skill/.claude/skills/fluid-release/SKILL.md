@@ -7,11 +7,20 @@ description: Guide the Fluid Framework client release group through minor releas
 
 Release workflow for the client release group. Supports two modes: **interactive** (default) and **autonomous**.
 
+## Environment Detection
+
+Check the `CI` environment variable at the start of every session:
+
+- **`CI=true`**: Running in a GitHub Actions workflow. Use only `origin` (no `upstream`). Use CI-safe commands (see [CI-safe alternatives](#ci-safe-command-alternatives)). Never prompt for input. Log blockers and phase completions to workflow output for human review.
+- **`CI` unset or false**: Running locally. Use `upstream`/`origin` detection as described in Key Context.
+
 ## Mode Selection
 
 At the start of every release session, ask the user:
 
 > Would you like to run in **interactive** or **autonomous** mode?
+
+In CI (`CI=true`), always use autonomous mode — do not prompt.
 
 ### Interactive Mode (default)
 
@@ -61,7 +70,7 @@ gh pr list --repo microsoft/FluidFramework --search "release-prep/<NEXT_VERSION>
 |-------|--------|
 | No release-prep branches, no release branch | Start **minor release prep** (Steps 1-5) |
 | Release-prep branches/PRs exist, some not merged | Resume **minor release prep** from where it left off |
-| Release branch exists, no release tag | Start **release execution** (Steps 6-7) |
+| Release branch exists, no release tag | In CI: open issue requesting human queue the ADO build. Locally: start **release execution** (Steps 6-7) |
 | Release tag exists, no patch bump PR | Resume **release execution** — do the patch bump (Step 7) |
 | Release tag exists, patch bump done, no type test PRs | Start **type test updates** (Steps 8-9) |
 | All phases complete | Report that the release is fully done and show the next scheduled release |
@@ -79,13 +88,22 @@ The release schedule is in [references/release-schedule.md](references/release-s
 
 Ask the user which phase they need (or auto-detect in autonomous mode — see above):
 
-| Phase | When to use | Reference |
-|-------|-------------|-----------|
-| **Minor release prep** | Starting a new minor release from `main` (Steps 1-5) | [minor-release-prep.md](references/minor-release-prep.md) |
-| **Release execution** | Running the release build + patch bump (Steps 6-7). Also used for **patch releases** on existing branches. | [release-execution.md](references/release-execution.md) |
-| **Type test updates** | Day after release: update baselines on main and release branch (Steps 8-9) | [type-test-updates.md](references/type-test-updates.md) |
+| Phase | When to use | CI-automatable? | Reference |
+|-------|-------------|-----------------|-----------|
+| **Minor release prep** | Starting a new minor release from `main` (Steps 1-5) | Yes (Steps 1-4 create PRs; Step 5 is a human step) | [minor-release-prep.md](references/minor-release-prep.md) |
+| **Release execution** | Running the release build + patch bump (Steps 6-7). Also used for **patch releases** on existing branches. | Partially (Step 6 = human queues ADO build; Step 7 = CI-automatable) | [release-execution.md](references/release-execution.md) |
+| **Type test updates** | Day after release: update baselines on main and release branch (Steps 8-9) | Yes (must be resilient to failure if npm packages not yet available) | [type-test-updates.md](references/type-test-updates.md) |
 
 For **patch releases**, skip directly to release execution on an existing release branch.
+
+### Human steps (cannot be automated)
+
+These steps require human action and should be clearly reported in CI workflow logs:
+
+1. **Merge release-prep PRs** in the correct order (version bump last) after CI creates them
+2. **Create the release branch** (Step 5) — requires elevated permissions on the `release/` branch prefix
+3. **Queue the ADO release build** (Step 6) — choose the "release" option in ADO
+4. **Announce the release** in the Fluid Framework "General" Teams channel
 
 ## Key Context
 
@@ -95,8 +113,22 @@ For **patch releases**, skip directly to release execution on an existing releas
 - Release branch naming: `release/client/<major>.<minor>` (e.g., `release/client/2.90`)
 - The release branch is created from the commit **before** the version bump on `main`
 - There is no `lerna.json` in this repo
-- **Git remote preference**: When pushing branches, prefer pushing to `upstream` if one is configured for the repo. Check with `git remote -v` if unsure. Only fall back to `origin` if no `upstream` remote exists.
+- **Git remote preference**: When pushing branches, prefer pushing to `upstream` if one is configured for the repo. Check with `git remote -v` if unsure. Only fall back to `origin` if no `upstream` remote exists. **Exception:** In CI (`CI=true`), always use `origin` — there is no `upstream`.
 - **Working branch naming**: Do NOT use the `release/` prefix for working branches because `release/` is protected on upstream. Use the standard naming convention below — these branches double as progress markers.
+
+### CI-safe Command Alternatives
+
+Some `flub` commands require interactive TTY input. In CI, use these alternatives:
+
+| Interactive command | CI-safe alternative |
+|---|---|
+| `flub bump client --bumpType patch` | `pnpm -r --include-workspace-root exec npm pkg set version=<VERSION>` followed by `pnpm install --no-frozen-lockfile` |
+| `flub bump client --exact <VERSION> --no-commit` | `pnpm -r --include-workspace-root exec npm pkg set version=<VERSION>` |
+| `flub release -g client -t patch` | **Not needed in CI.** The release build is queued manually by a human in ADO. CI only handles prep and post-release phases. |
+
+After using `npm pkg set` to bump versions, also run `pnpm -r run build:genver` to update `packageVersion.ts` files, and `pnpm install --no-frozen-lockfile` to update the lockfile.
+
+Non-interactive `flub` commands that are safe in CI (no TTY required): `flub generate releaseNotes`, `flub generate changelog`, `flub typetests`, `flub release prepare`.
 
 ### Working Branch Convention
 
@@ -136,11 +168,15 @@ gh pr list --repo microsoft/FluidFramework --label release-blocking --state open
 
 If either command returns results, **stop and report the blockers to the user**. In autonomous mode, do not proceed past this check if blockers exist. Also remind the user to check ADO for release-blocking issues (cannot be queried via CLI).
 
+**CI behavior when blocked:** In CI, if the agent is blocked at any point (release blockers, missing release tag, npm packages not available, permission errors, or any other issue that prevents progress), open a GitHub issue in `microsoft/FluidFramework` describing the blocker and what human action is needed. Use the title format `Release <VERSION>: <brief description of blocker>` and label it with `release-blocking`. Then exit gracefully.
+
 ## Behavior by Mode
 
 ### Commands (both modes)
 
-Run these autonomously in both modes: `policy-check:asserts`, `layerGeneration:gen`, `flub generate releaseNotes`, `flub generate changelog`, `flub bump`, `build:genver`, `flub typetests`, `flub release prepare`
+Run these autonomously in both modes: `policy-check:asserts`, `layerGeneration:gen`, `flub generate releaseNotes`, `flub generate changelog`, `build:genver`, `flub typetests`, `flub release prepare`
+
+For version bumps, use `flub bump` locally or CI-safe alternatives in CI (see [CI-safe alternatives](#ci-safe-command-alternatives)).
 
 ### PR Conventions
 
