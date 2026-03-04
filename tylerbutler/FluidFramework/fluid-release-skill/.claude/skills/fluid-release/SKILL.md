@@ -1,6 +1,6 @@
 ---
 name: fluid-release
-description: Guide the Fluid Framework client release group through minor releases, patch releases, and post-release type test updates. Use when performing a release, preparing for a release, creating release branches, bumping versions, generating changelogs/release notes, or updating type test baselines after a release. Triggers on mentions of release, releasing, release branch, version bump, release notes, changelog generation, patch release, minor release, or release engineering.
+description: Guide the Fluid Framework client release group through minor releases, patch releases, and post-release type test updates. Use when performing a release, preparing for a release, creating release branches, bumping versions, generating changelogs/release notes, or updating type test baselines after a release. Also use when the user says generic things like "do the release", "finish the release", "what's the next release", or "release status" — in autonomous mode the agent auto-detects what needs to be done from the schedule and repo state. Triggers on mentions of release, releasing, release branch, version bump, release notes, changelog generation, patch release, minor release, or release engineering.
 ---
 
 # Fluid Framework Client Release
@@ -21,15 +21,63 @@ Run commands autonomously but pause before creating PRs, pushing branches, or tr
 
 Run the entire selected phase end-to-end without pausing. Requirements:
 
-- **Version info upfront:** The user must provide all version numbers before starting (current release version and/or next version, depending on phase). Do not prompt for versions mid-flow.
+- **Version info upfront:** The user must provide all version numbers before starting (current release version and/or next version, depending on phase). Do not prompt for versions mid-flow. If the user doesn't provide versions, detect them from the schedule and repo state (see below).
 - **No confirmation pauses:** Create PRs, push branches, and run `flub release` without asking. Include clear commit messages and PR descriptions.
 - **Phase-scoped execution:** Each phase runs to completion, then reports what the user needs to do next (e.g., "queue the ADO build" or "wait for npm feeds, then re-invoke for type test updates").
 
 If the user provides version info in their initial message (e.g., "release 2.90.0 autonomously"), skip the version questions entirely.
 
+#### Auto-detecting release state (autonomous mode)
+
+When the user gives a generic request like "do the release" or "finish the release" without specifying a version or phase, auto-detect from the release schedule and repo state. Read the [release schedule](references/release-schedule.md) and run the detection steps below.
+
+**Step 1: Identify the most recent release.**
+
+```bash
+# Get the latest client release tag
+git tag -l 'client_v2.*' --sort=-version:refname | head -1
+```
+
+**Step 2: Identify the next scheduled release.**
+
+Compare today's date against the schedule. The next release is the earliest scheduled entry whose proposed date is >= today and whose version is greater than the most recently released version. Also check if a release is _overdue_ (proposed date < today but no tag exists).
+
+**Step 3: Check if a release is in progress.**
+
+```bash
+# Check for release-prep branches for the next version
+git ls-remote --heads upstream 'release-prep/<NEXT_VERSION>/*'
+# Check for the release branch
+git ls-remote --heads upstream 'release/client/<NEXT_MAJOR>.<NEXT_MINOR>'
+# Check for a release tag
+git tag -l 'client_v<NEXT_VERSION>'
+# Check for open PRs
+gh pr list --repo microsoft/FluidFramework --search "release-prep/<NEXT_VERSION>" --state all
+```
+
+**Step 4: Determine the phase and act.**
+
+| State | Action |
+|-------|--------|
+| No release-prep branches, no release branch | Start **minor release prep** (Steps 1-5) |
+| Release-prep branches/PRs exist, some not merged | Resume **minor release prep** from where it left off |
+| Release branch exists, no release tag | Start **release execution** (Steps 6-7) |
+| Release tag exists, no patch bump PR | Resume **release execution** — do the patch bump (Step 7) |
+| Release tag exists, patch bump done, no type test PRs | Start **type test updates** (Steps 8-9) |
+| All phases complete | Report that the release is fully done and show the next scheduled release |
+
+Present the detected state and chosen action to the user before proceeding. Example:
+
+> **Detected state:** 2.91.0 is scheduled for 03/16/26. No release-prep branches found. The most recent release is 2.90.0.
+> **Action:** Starting minor release prep for 2.91.0 (next version on main: 2.92.0).
+
+## Release Schedule
+
+The release schedule is in [references/release-schedule.md](references/release-schedule.md). It contains proposed dates, release versions, and the corresponding "main" version after each release. Use this to determine version numbers and timing in autonomous mode.
+
 ## Workflow Selection
 
-Ask the user which phase they need (or detect from context in autonomous mode):
+Ask the user which phase they need (or auto-detect in autonomous mode — see above):
 
 | Phase | When to use | Reference |
 |-------|-------------|-----------|
