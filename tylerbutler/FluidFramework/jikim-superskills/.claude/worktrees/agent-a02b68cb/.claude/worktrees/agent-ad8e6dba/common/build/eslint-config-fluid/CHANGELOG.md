@@ -1,0 +1,458 @@
+# @fluidframework/eslint-config-fluid Changelog
+
+## 2.90.0
+
+Dependency updates only.
+
+## 2.83.0
+
+Dependency updates only.
+
+## 2.82.0
+
+Dependency updates only.
+
+## 2.81.0
+
+Dependency updates only.
+
+## 2.80.0
+
+Dependency updates only.
+
+## 2.74.0
+
+Dependency updates only.
+
+## Unreleased
+
+### Native ESLint 9 Flat Config (No FlatCompat)
+
+The flat config implementation has been refactored to use native ESLint 9 flat config format, removing the dependency on `FlatCompat` from `@eslint/eslintrc`. This provides cleaner configuration and better compatibility with ESLint 9.
+
+#### Flat Config Exports
+
+The `flat.mts` module now exports four configurations:
+
+- `recommended` - The recommended configuration for most projects
+- `strict` - Stricter rules for production code
+- `minimalDeprecated` - Minimal configuration (deprecated, use recommended)
+- `strictBiome` - Strict configuration with Biome formatter compatibility
+
+#### Modular Structure
+
+The configuration is now organized into a modular structure under `library/`:
+
+- `library/constants.mts` - Shared constants (ignores, file patterns, import restrictions)
+- `library/settings.mts` - Plugin settings (import-x, jsdoc)
+- `library/rules/` - Rule definitions organized by config level (base, minimal-deprecated, recommended, strict)
+- `library/configs/` - Config builders and shared overrides
+
+### Removed Rushstack Dependencies
+
+The following packages have been removed from dependencies:
+
+- `@rushstack/eslint-patch`
+- `@rushstack/eslint-plugin-security`
+
+The `@rushstack/eslint-plugin-security` plugin has been removed from all configurations. The `patch/modern-module-resolution.js` file has also been removed as it was only needed to support the `@rushstack/eslint-patch` dependency.
+
+### ESLint 9 Flat Config Support
+
+This package now supports ESLint 9 flat config format via a new `flat.mjs` export. The flat config wraps existing configs using `FlatCompat` from `@eslint/eslintrc` for backward compatibility.
+
+Key features:
+
+- New `flat.mjs` module exports `recommended`, `strict`, and `minimalDeprecated` configs for ESLint 9
+- Automatic handling of type-aware parsing configuration for JavaScript files and test files
+- Generated `eslint.config.mjs` files for all packages in the repository
+- Script to regenerate flat configs: `pnpm tsx scripts/generate-flat-eslint-configs.ts`
+
+Packages can now use `eslint.config.mjs` instead of `.eslintrc.cjs`, but the legacy `.eslintrc.cjs` format remains supported for backward compatibility. Migration is optional and not required.
+
+### ESLint Rule Changes
+
+**React Hooks plugin upgraded**: Upgraded from `~5.2.0` to `~7.0.1`, enabling several new React Hooks linting rules.
+
+**New react-hooks rules enabled as `"error"`**:
+
+- `react-hooks/component-hook-factories`
+- `react-hooks/config`
+- `react-hooks/error-boundaries`
+- `react-hooks/gating`
+- `react-hooks/globals`
+- `react-hooks/preserve-manual-memoization`
+- `react-hooks/purity`
+- `react-hooks/set-state-in-render`
+- `react-hooks/use-memo`
+
+**React-hooks rules temporarily downgraded to `"warn"`** (until ESLint 9 migration completes):
+
+- `react-hooks/rules-of-hooks`: Changed from `"error"` to `"warn"`
+- `react-hooks/exhaustive-deps`: Changed from `"error"` to `"warn"`
+- `react-hooks/immutability`: New rule set to `"warn"`
+- `react-hooks/incompatible-library`: New rule set to `"warn"`
+- `react-hooks/refs`: New rule set to `"warn"`
+- `react-hooks/set-state-in-effect`: New rule set to `"warn"`
+- `react-hooks/static-components`: New rule set to `"warn"`
+- `react-hooks/unsupported-syntax`: New rule set to `"warn"`
+
+**New unicorn rules** (enabled as `"error"` by default):
+
+- `unicorn/consistent-empty-array-spread`
+- `unicorn/no-anonymous-default-export`
+- `unicorn/no-await-in-promise-methods`
+- `unicorn/no-invalid-fetch-options`
+- `unicorn/no-magic-array-flat-depth`
+- `unicorn/no-negation-in-equality-check`
+- `unicorn/no-single-promise-in-promise-methods`
+- `unicorn/no-unnecessary-polyfills`
+
+**Unicorn rules disabled** (consider enabling in future):
+
+- `unicorn/import-style`: Changed from `"error"` to `"off"`
+- `unicorn/consistent-destructuring`: Changed from `"error"` to `"off"`
+- `unicorn/no-array-callback-reference`: Changed from `"error"` to `"off"`
+    - Yields false positives for calls to `map` methods on non-array types.
+
+**Unicorn rules changed to warnings** (to surface occurrences without breaking builds):
+
+- `unicorn/prefer-at`: Changed from `"off"` to `"warn"`
+- `unicorn/prefer-string-raw`: New rule set to `"warn"`
+- `unicorn/prefer-string-replace-all`: Changed from `"off"` to `"warn"`
+- `unicorn/prefer-structured-clone`: New rule set to `"warn"`
+
+#### Rule promotions
+
+**recommended -> minimal**
+
+- `@typescript-eslint/explicit-function-return-type`
+- `@typescript-eslint/no-import-type-side-effects`
+- `jsdoc/multiline-blocks`
+- `no-empty`
+
+#### Rule modifications
+
+- `jsdoc/multiline-blocks`: Updated to allow single-line comments to be expressed as a single line. E.g. `/** Single-line comment */`.
+
+## [9.0.0](https://github.com/microsoft/FluidFramework/releases/tag/eslint-config-fluid_v9.0_0)
+
+### eslint-plugin-eslint-comments replaced by @eslint-community/eslint-plugin-eslint-comments
+
+The package now uses rules from
+[@eslint-community/eslint-plugin-eslint-comments](https://eslint-community.github.io/eslint-plugin-eslint-comments/)
+v4.5.0 instead of eslint-plugin-eslint-comments v3.2.0. Integrating this change will require renaming eslint disable
+comments and overrides, but the changes are mechanical.
+
+## [8.1.0](https://github.com/microsoft/FluidFramework/releases/tag/eslint-config-fluid_v8.1.0)
+
+### import-x/order rule simplified
+
+The `import-x/order` rule configuration has been simplified to use basic grouping without alphabetization or newlines-between settings. This provides more flexibility in import ordering while still maintaining consistent grouping of import types.
+
+### Resolver configuration updated
+
+The TypeScript resolver configuration has been updated to work correctly with the repository's build setup. The resolver no longer requires explicit name and options wrapping, and uses the resolver directly.
+
+### no-hyphen-after-jsdoc-tag rule disabled
+
+The `@fluid-internal/fluid/no-hyphen-after-jsdoc-tag` rule has been temporarily disabled pending resolution of ADO work item 29535.
+
+## [8.0.0](https://github.com/microsoft/FluidFramework/releases/tag/eslint-config-fluid_v8.0.0)
+
+### eslint-plugin-import replaced by eslint-plugin-import-x
+
+The package now uses rules from [eslint-plugin-import-x](https://github.com/un-ts/eslint-plugin-import-x) instead of
+eslint-plugin-import. Integrating this change will require renaming eslint disable comments and overrides, but the
+changes are mechanical.
+
+## [7.0.0](https://github.com/microsoft/FluidFramework/releases/tag/eslint-config-fluid_v7.0_0)
+
+### New Rules
+
+- `@fluid-internal/fluid/no-hyphen-after-jsdoc-tag`
+- `@fluid-internal/fluid/no-file-path-links-in-jsdoc`
+- `@fluid-internal/fluid/no-markdown-links-in-jsdoc`
+- [@typescript-eslint/no-empty-object-type](https://typescript-eslint.io/rules/no-empty-object-type/)
+- [@typescript-eslint/no-unsafe-function-type](https://typescript-eslint.io/rules/no-unsafe-function-type/)
+- [@typescript-eslint/no-wrapper-object-types](https://typescript-eslint.io/rules/no-wrapper-object-types/)
+
+### Update TypeScript plugin dependencies
+
+`@typescript-eslint/eslint-plugin` and `@typescript-eslint/parser` have been updated.
+These updates includes the deprecation and replacement of a couple of rules that were included in this library.
+
+The following rules have been deprecated and disabled in this library:
+
+- [ban-types](https://typescript-eslint.io/rules/ban-types/)
+- [no-empty-interface](https://typescript-eslint.io/rules/no-empty-interface/)
+
+They are replaced by the following new rules, which are now configured as errors in this library:
+
+- [no-empty-object-type](https://typescript-eslint.io/rules/no-empty-object-type/)
+- [no-unsafe-function-type](https://typescript-eslint.io/rules/no-unsafe-function-type/)
+- [no-wrapper-object-types](https://typescript-eslint.io/rules/no-wrapper-object-types/)
+
+## [6.1.1](https://github.com/microsoft/FluidFramework/releases/tag/eslint-config-fluid_v6.1.1)
+
+Enables the following new rules as warnings (they will be promoted to errors in the next major release):
+
+- `@fluid-internal/fluid/no-hyphen-after-jsdoc-tag`
+
+### 🐞 Bug fixes
+
+Fixes indexing issues in the following rules, which would cause incorrect notification ranges and could cause malformed code fixes:
+
+- `@fluid-internal/fluid/no-file-path-links-in-jsdoc`
+- `@fluid-internal/fluid/no-markdown-links-in-jsdoc`
+
+## [6.1.0](https://github.com/microsoft/FluidFramework/releases/tag/eslint-config-fluid_v6.1.0)
+
+Update dependencies on the following packages:
+
+- `@fluid-tools/eslint-plugin-fluid` (from 0.1.5 to 0.2.0)
+
+Enables the following new rules as warnings (they will be promoted to errors in the next major release):
+
+- `@fluid-internal/fluid/no-file-path-links-in-jsdoc`
+- `@fluid-internal/fluid/no-markdown-links-in-jsdoc`
+- [@typescript-eslint/no-empty-object-type](https://typescript-eslint.io/rules/no-empty-object-type/)
+- [@typescript-eslint/no-unsafe-function-type](https://typescript-eslint.io/rules/no-unsafe-function-type/)
+- [@typescript-eslint/no-wrapper-object-types](https://typescript-eslint.io/rules/no-wrapper-object-types/)
+
+## [6.0.1](https://github.com/microsoft/FluidFramework/releases/tag/eslint-config-fluid_v6.0_1)
+
+Update dependencies on the following packages:
+
+- `@typescript-eslint/eslint-plugin` (from 7.0.0 to 7.18.0)
+- `@typescript-eslint/parser` (from 7.0.0 to 7.18.0)
+
+## [6.0.0](https://github.com/microsoft/FluidFramework/releases/tag/eslint-config-fluid_v6.0_0)
+
+Adds the following [@typescript-eslint/no-restricted-imports](https://typescript-eslint.io/rules/no-restricted-imports/) rules:
+
+1. Prefer using [strict](https://nodejs.org/api/assert.html#strict-assertion-mode) assertions from Node's `assert` library.
+    - E.g. prefer `import { strict as assert } from "assert";` over `import assert from "assert";`.
+2. Don't import from parent index file.
+    - E.g. prefer `import { Foo } from "./Foo.js";` over `import { Foo } from "./index.js";`
+
+## [5.8.0](https://github.com/microsoft/FluidFramework/releases/tag/eslint-config-fluid_v5.8_0)
+
+Promotes the following rules from the `strict` ruleset to the `recommended` ruleset:
+
+- [@typescript-eslint/consistent-type-exports](https://typescript-eslint.io/rules/consistent-type-exports/)
+- [@typescript-eslint/consistent-type-imports](https://typescript-eslint.io/rules/consistent-type-imports/)
+- [@typescript-eslint/no-import-type-side-effects](https://typescript-eslint.io/rules/no-import-type-side-effects/)
+
+## [5.7.4](https://github.com/microsoft/FluidFramework/releases/tag/eslint-config-fluid_v5.7.4)
+
+Updates the contexts in which `jsdoc/require-jsdoc` is applied to make it less overzealous.
+Specifically, removes the "VariableDeclaration" context, which would incorrectly trigger for variables that were not exported.
+
+### Example
+
+```typescript
+/**
+ * foo
+ */
+export function foo(): void {
+	// Before the fix, because the outer scope, `foo`, was exported, this variable `bar` would be incorrectly flagged as needing a JSDoc/TSDoc comment.
+	// After the fix, variables inside exported functions, like `bar`, are no longer flagged.
+	const bar = "baz";
+	...
+}
+```
+
+## [5.7.3](https://github.com/microsoft/FluidFramework/releases/tag/eslint-config-fluid_v5.7.3)
+
+Added support for two new patterns in the no-unchecked-record-access ESLint rule:
+
+1. **Nullish Coalescing Assignment Recognition**
+    - The rule now recognizes nullish coalescing assignment (`??=`) as a valid safety check
+    - Properties accessed after a nullish coalescing assignment will not trigger warnings
+
+2. **Else Block Assignment Handling**
+    - Added detection for property assignments in else blocks of existence checks
+    - Example pattern now supported:
+        ```typescript
+        if ("key" in obj) {
+        	// use obj.key
+        } else {
+        	obj.key = defaultValue;
+        	// use obj.key
+        }
+        ```
+    - The rule understands that after the else block assignment, the property is safe to use
+    - Works with both direct property access and computed property access
+
+## [5.7.2](https://github.com/microsoft/FluidFramework/releases/tag/eslint-config-fluid_v5.7.2)
+
+Disabled the [unicorn/no-array-push-push](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-array-push-push.md) rule, which reports false positives for methods named "push" on non-array objects.
+
+## [5.6.0](https://github.com/microsoft/FluidFramework/releases/tag/eslint-config-fluid_v5.6.0)
+
+### New config for use with Biome linter
+
+A new strict-biome config is available that disables all rules that Biome's recommended config includes.
+This config is intended to be used in projects that use both eslint and Biome for linting.
+This config is considered experimental.
+
+### Auto-fix behavior change for @typescript-eslint/consistent-type-exports
+
+Update auto-fix policy for `@typescript-eslint/consistent-type-exports` to prefer inline `type` annotations, rather than splitting exports into type-only and non-type-only groups.
+This makes it easier to tell at a glance how the auto-fix changes affect individual exports when a list of exports is large.
+It also makes it easier to detect issues in edge-cases where the the rule is applied incorrectly.
+
+E.g.:
+
+```typescript
+export { type Foo, Bar } from "./baz.js";
+```
+
+instead of:
+
+```typescript
+export type { Foo } from "./baz.js";
+export { Bar } from "./baz.js";
+```
+
+## [5.5.1](https://github.com/microsoft/FluidFramework/releases/tag/eslint-config-fluid_v5.5.1)
+
+### Disabled rules
+
+The formatting-related rules below have been disabled in all configs because we use biome or prettier to enforce
+formatting conventions. In addition, most of these rules are now deprecated because linters are decreasing their focus
+on formatting-related rules in favor of dedicated formatting tools.
+
+#### typescript-eslint
+
+- @typescript-eslint/comma-spacing
+- @typescript-eslint/func-call-spacing
+- @typescript-eslint/keyword-spacing
+- @typescript-eslint/member-delimiter-style
+- @typescript-eslint/object-curly-spacing
+- @typescript-eslint/semi
+- @typescript-eslint/space-before-function-paren
+- @typescript-eslint/space-infix-ops
+- @typescript-eslint/type-annotation-spacing
+
+#### eslint
+
+All rules below are deprecated. See <https://eslint.org/docs/latest/rules/#deprecated>
+
+- array-bracket-spacing
+- arrow-spacing
+- block-spacing
+- dot-location
+- jsx-quotes
+- key-spacing
+- space-unary-ops
+- switch-colon-spacing
+
+### Better test pattern support
+
+Update rule overrides for test code to better support patterns in the repo.
+Namely, adds the allowance to "\*\*/tests" directories.
+
+## [5.4.0](https://github.com/microsoft/FluidFramework/releases/tag/eslint-config-fluid_v5.4.0)
+
+### New no-unchecked-record-access rule
+
+Enabled new no-unchecked-record-access rule to enforce safe property access on index signature types.
+
+### Disabled rules
+
+The following rules have been disabled in all configs because they conflict with formatter settings:
+
+- [@typescript-eslint/brace-style](https://typescript-eslint.io/rules/brace-style)
+- [unicorn/number-literal-case](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/v48.0.1/docs/rules/number-literal-case.md)
+
+The following rules have been disabled for test code:
+
+- [unicorn/prefer-module](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/v48.0.1/docs/rules/prefer-module.md)
+
+The following rules have been disabled due to frequency of false-positives reported:
+
+- [unicorn/no-useless-spread](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/v48.0.1/docs/rules/no-useless-spread.md)
+
+### @typescript-eslint/explicit-function-return-type changes
+
+The [allowExpressions](https://typescript-eslint.io/rules/explicit-function-return-type/#allowexpressions) option for
+the @typescript-eslint/explicit-function-return-type rule has been set to `true`.
+
+### @typescript-eslint/no-explicit-any changes
+
+The [ignoreRestArgs](https://typescript-eslint.io/rules/no-explicit-any#ignorerestargs) option for
+the @typescript-eslint/no-explicit-any rule has been set to `true`.
+
+### import/no-internal-modules changes
+
+All imports from @fluid-experimental packages are now permitted.
+
+## [5.3.0](https://github.com/microsoft/FluidFramework/releases/tag/eslint-config-fluid_v5.3.0)
+
+The import/order rule is enabled with the following settings:
+
+```json
+[
+	"error",
+	{
+		"newlines-between": "always",
+		"alphabetize": {
+			"order": "asc",
+			"caseInsensitive": false
+		}
+	}
+]
+```
+
+### eslint-import-resolver-typescript preferred over node
+
+Lint configurations previously specified both the `node` and `typescript` [resolvers](https://github.com/import-js/eslint-plugin-import?tab=readme-ov-file#resolvers), with the `node` resolver taking precedence.
+
+The precedence has been reversed in this release: [eslint-import-resolver-typescript](https://github.com/import-js/eslint-import-resolver-typescript) is now the preferred resolver.
+
+This may result in lint rules dependent on imported _types_ (rather than values) to correctly apply, e.g. `import/no-deprecated`.
+
+### allow-ff-test-exports condition enabled
+
+The typescript import resolver now enables the "allow-ff-test-exports" condition, which adds support for linting files which reference FluidFramework test-only exports,
+such as id-compressor and merge-tree.
+
+## [5.2.0](https://github.com/microsoft/FluidFramework/releases/tag/eslint-config-fluid_v5.2.0)
+
+The import/order rule is now disabled in all configs.
+
+## [5.1.0](https://github.com/microsoft/FluidFramework/releases/tag/eslint-config-fluid_v5.1.0)
+
+Enables new API trimming rules.
+
+## [5.0.0](https://github.com/microsoft/FluidFramework/releases/tag/eslint-config-fluid_v5.0.0)
+
+Adds eslint-plugin-fluid to eslint-config-fluid. This new dependency adds new Fluid-specific rules.
+
+## [4.0.0](https://github.com/microsoft/FluidFramework/releases/tag/eslint-config-fluid_v4.0.0)
+
+Deprecates this package's `minimal` configuration.
+Consumers of that configuration will need to update their imports to refer to the renamed module: `minimal-deprecated.js`.
+
+## [3.0.0](https://github.com/microsoft/FluidFramework/releases/tag/eslint-config-fluid_v3.0.0)
+
+### Update eslint-related dependencies
+
+eslint has been updated to version ~8.49.0. eslint plugins have also been updated to the latest version.
+
+### Update prettier
+
+prettier has been updated to version ~3.0.3.
+
+### Update #16699 typescript-eslint
+
+typescript-eslint has been updated to version ~6.7.2.
+
+## [2.1.0](https://github.com/microsoft/FluidFramework/releases/tag/eslint-config-fluid_v2.1.0)
+
+### Enable the import-no-deprecated rule
+
+The [import/no-deprecated](https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/no-deprecated.md) rule
+is now enabled for all configs except test files.

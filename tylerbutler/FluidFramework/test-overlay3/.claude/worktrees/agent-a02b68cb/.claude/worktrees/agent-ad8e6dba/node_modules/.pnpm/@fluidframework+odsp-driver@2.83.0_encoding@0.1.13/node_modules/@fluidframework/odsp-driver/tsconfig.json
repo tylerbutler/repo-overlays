@@ -1,0 +1,12 @@
+{
+	"extends": "../../../common/build/build-common/tsconfig.node16.json",
+	"include": ["src/**/*"],
+	"exclude": ["src/test/**/*"],
+	"compilerOptions": {
+		"rootDir": "./src",
+		"outDir": "./lib",
+		"exactOptionalPropertyTypes": false,
+		// TODO: AB#34163 Enable noUncheckedIndexedAccess for packages/drivers/odsp-driver
+		"noUncheckedIndexedAccess": false,
+	},
+}

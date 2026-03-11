@@ -1,0 +1,90 @@
+/*!
+ * Copyright (c) Microsoft Corporation and contributors. All rights reserved.
+ * Licensed under the MIT License.
+ */
+
+/**
+ * A library for creating AI agents to interact with a {@link SharedTree | https://fluidframework.com/docs/data-structures/tree/}.
+ *
+ * @packageDocumentation
+ */
+
+export {
+	SharedTreeSemanticAgent,
+	createContext,
+	createTreeAgent,
+} from "./agent.js";
+export type {
+	// New API
+	TreeAgent,
+	TreeAgentChatMessage,
+	TreeAgentSystemMessage,
+	TreeAgentUserMessage,
+	TreeAgentAssistantMessage,
+	TreeAgentToolCallMessage,
+	TreeAgentToolResultMessage,
+	TreeAgentChatResponse,
+	TreeAgentOptions,
+	// Existing API
+	EditResult,
+	SharedTreeChatModel,
+	SharedTreeChatQuery,
+	Logger,
+	SemanticAgentOptions,
+	SynchronousEditor,
+	AsynchronousEditor,
+	TreeView,
+	ViewOrTree,
+	Context,
+} from "./api.js";
+export { llmDefault } from "./utils.js";
+export {
+	buildFunc,
+	exposeMethodsSymbol,
+	type ArgsTuple,
+	type ExposedMethods,
+	type Arg,
+	type FunctionDef,
+	type MethodKeys,
+	type BindableSchema,
+	type Ctor,
+	type IExposedMethods,
+} from "./methodBinding.js";
+export type {
+	exposePropertiesSymbol,
+	PropertyDef,
+	ExposedProperties,
+	IExposedProperties,
+} from "./propertyBinding.js";
+
+export {
+	typeFactory,
+	isTypeFactoryType,
+} from "./treeAgentTypes.js";
+
+export type {
+	TypeFactoryType,
+	TypeFactoryTypeKind,
+	TypeFactoryString,
+	TypeFactoryNumber,
+	TypeFactoryBoolean,
+	TypeFactoryDate,
+	TypeFactoryVoid,
+	TypeFactoryUndefined,
+	TypeFactoryNull,
+	TypeFactoryUnknown,
+	TypeFactoryArray,
+	TypeFactoryPromise,
+	TypeFactoryObject,
+	TypeFactoryRecord,
+	TypeFactoryMap,
+	TypeFactoryTuple,
+	TypeFactoryUnion,
+	TypeFactoryIntersection,
+	TypeFactoryLiteral,
+	TypeFactoryOptional,
+	TypeFactoryReadonly,
+	TypeFactoryFunction,
+	TypeFactoryFunctionParameter,
+	TypeFactoryInstanceOf,
+} from "./treeAgentTypes.js";
